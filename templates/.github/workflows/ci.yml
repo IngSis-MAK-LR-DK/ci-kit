@@ -1,0 +1,12 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check:
+    uses: IngSis-MAK-LR-DK/ci-kit/.github/workflows/java-ci.yml@v1
+    permissions:
+      contents: read
+      packages: read

@@ -1,0 +1,40 @@
+# Workflow REUTILIZABLE: no corre solo, lo llaman los servicios con
+#   uses: IngSis-MAK-LR-DK/ci-kit/.github/workflows/java-ci.yml@v1
+name: Java CI
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        description: Version de Java con la que se corre Gradle
+        type: string
+        default: "17"
+      gradle-tasks:
+        description: Tareas de Gradle a ejecutar
+        type: string
+        default: "check"
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ inputs.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Run ${{ inputs.gradle-tasks }}
+        run: ./gradlew ${{ inputs.gradle-tasks }}
+        env:
+          # Para que settings.gradle.kts pueda bajar el plugin de ci-kit desde GitHub Packages.
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,12 @@
+name: Publish
+
+on:
+  release:
+    types: [ created ]
+
+jobs:
+  publish:
+    uses: IngSis-MAK-LR-DK/ci-kit/.github/workflows/java-publish.yml@v1
+    permissions:
+      contents: read
+      packages: write
