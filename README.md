@@ -73,7 +73,7 @@ Detalle de cada archivo importante:
    ```bash
    git tag v1 && git push origin v1
    ```
-5. En GitHub, andá al paquete publicado (ci-kit → *Packages*) → *Package settings* → *Manage Actions access* y agregá cada servicio con permiso **Read**. Sin esto, el CI de los servicios no puede bajar el plugin.
+5. Dejá el repo **público**. El plugin hereda esa visibilidad, así que el CI de cualquier servicio lo puede bajar con su propio `GITHUB_TOKEN`, sin dar acceso repo por repo.
 
 ## Paso 2: usarlo en un servicio nuevo
 
@@ -92,7 +92,7 @@ El servicio necesita su propio Gradle wrapper (`gradlew`). Si lo creás con Spri
 
 ### En tu PC: credenciales para bajar el plugin
 
-GitHub Packages pide login **incluso para leer**. En CI las credenciales se pasan solas; en tu PC hacé esto una vez:
+GitHub Packages pide login **incluso para leer paquetes públicos**. En CI las credenciales se pasan solas; en tu PC hacé esto una vez:
 
 1. GitHub → *Settings → Developer settings → Personal access tokens (classic)* → creá uno con el permiso **`read:packages`**.
 2. Agregá a `C:\Users\<tu-usuario>\.gradle\gradle.properties` (no al repo):
