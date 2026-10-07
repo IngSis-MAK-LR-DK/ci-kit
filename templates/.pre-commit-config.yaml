@@ -6,5 +6,6 @@ repos:
         entry: ./gradlew check
         language: system
         pass_filenames: false
-        # Instalar: pip install pre-commit && pre-commit install
+        # Este archivo solo dice QUE correr. El hook lo activa cada persona en su clon:
+        #   pip install pre-commit && pre-commit install
         # A partir de ahi corre ./gradlew check en cada commit.
