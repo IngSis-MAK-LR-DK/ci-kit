@@ -85,7 +85,7 @@ Copiá el contenido de `templates/` a la raíz del servicio:
 | `build.gradle.kts` | Aplica el plugin con **una línea** | `group`/`version`; descomentá `published-library` si es una librería |
 | `.github/workflows/ci.yml` | El CI del servicio: 5 líneas que llaman al de ci-kit | Nada |
 | `.github/workflows/publish.yml` | Publica al crear un Release (solo librerías) | Nada; borralo si no publicás |
-| `.pre-commit-config.yaml` | Corre `./gradlew check` antes de cada commit | Nada |
+| `.pre-commit-config.yaml` | Corre `./gradlew check` antes de cada commit (**cada persona lo activa con `pre-commit install`**, ver abajo) | Nada |
 | `.editorconfig`, `.gitattributes` | Que el editor y git usen el mismo formato (LF, 4 espacios) | Nada |
 
 El servicio necesita su propio Gradle wrapper (`gradlew`). Si lo creás con Spring Initializr o IntelliJ, ya viene.
@@ -95,22 +95,39 @@ El servicio necesita su propio Gradle wrapper (`gradlew`). Si lo creás con Spri
 GitHub Packages pide login **incluso para leer paquetes públicos**. En CI las credenciales se pasan solas; en tu PC hacé esto una vez:
 
 1. GitHub → *Settings → Developer settings → Personal access tokens (classic)* → creá uno con el permiso **`read:packages`**.
-2. Agregá a `C:\Users\<tu-usuario>\.gradle\gradle.properties` (no al repo):
+2. Agregá estas dos líneas al archivo `gradle.properties` de tu usuario (**no** al repo). Si no existe, crealo:
+
+   | Sistema | Ruta |
+   |---|---|
+   | macOS / Linux | `~/.gradle/gradle.properties` |
+   | Windows | `C:\Users\<tu-usuario>\.gradle\gradle.properties` |
+
    ```properties
    gpr.user=tu-usuario-de-github
    gpr.key=el-token
    ```
 
-### Pre-commit (opcional pero recomendado)
+### Pre-commit: lo tiene que instalar **cada persona, en cada clon**
 
-```bash
-pip install pre-commit
-```
-```bash
-pre-commit install
-```
+El archivo `.pre-commit-config.yaml` solo dice *qué* correr. El hook que realmente corre antes de cada commit **no viaja con el repo**: cada integrante del equipo tiene que activarlo una vez en su propia copia (y de nuevo si clona el servicio en otra carpeta o máquina). Sin ese paso, `git commit` no revisa nada y los errores se enteran recién en el CI.
 
-Desde ahí, cada `git commit` corre `./gradlew check` y no te deja commitear si algo falla. Te enterás en tu PC en vez de esperar al CI.
+1. Instalá la herramienta (una sola vez por máquina):
+   ```bash
+   pip install pre-commit
+   ```
+2. Activá el hook **dentro de cada servicio que clonés**:
+   ```bash
+   cd mi-servicio
+   pre-commit install
+   ```
+3. Comprobá que quedó activo (tiene que existir el archivo):
+   ```bash
+   ls .git/hooks/pre-commit
+   ```
+
+Desde ahí, cada `git commit` corre `./gradlew check` y no te deja commitear si algo falla. Si necesitás probarlo sin commitear: `pre-commit run --all-files`.
+
+> Cada commit tarda lo que tarda `./gradlew check` (unos segundos). Como el hook pide que **todo el proyecto** pase, conviene commitear cada cambio junto con sus tests.
 
 ---
 
@@ -134,6 +151,20 @@ jobs:
     with:
       java-version: "21"
 ```
+
+### Servicios con Spring Boot
+
+El plugin funciona con Spring Boot (plugins `org.springframework.boot` e `io.spring.dependency-management`). Tené en cuenta:
+
+- **JUnit:** desde la **1.0.1** el plugin alinea JUnit con el BOM de Spring Boot y no hace falta ningún parche. Con la **1.0.0** hay que agregar `extra["junit-jupiter.version"] = "5.10.3"` en el `build.gradle.kts`, si no los tests fallan con `NoSuchMethodError`.
+- **Cobertura:** la clase con `main()` no se puede cubrir con tests unitarios. Excluila de JaCoCo en el `build.gradle.kts` del servicio (hay un ejemplo en `permission-service`).
+
+## Historial de versiones del plugin
+
+| Versión | Cambio |
+|---|---|
+| 1.0.1 | JUnit se alinea con el BOM de JUnit (compatible con Spring Boot sin parches) |
+| 1.0.0 | Primera versión: spotless, checkstyle, JUnit 5, JaCoCo |
 
 ---
 

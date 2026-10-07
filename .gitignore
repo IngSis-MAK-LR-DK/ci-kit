@@ -12,3 +12,6 @@ out/
 # OS
 .DS_Store
 
+
+# Cache de Kotlin generado por Gradle
+.kotlin

@@ -57,10 +57,14 @@ repositories {
 
 private val junitVersion = "5.10.3"
 
+// Los modulos de JUnit se declaran SIN version y se alinean con el BOM de JUnit. Asi, si el
+// servicio trae otro BOM (por ejemplo Spring Boot), Gradle elige una sola version para todos
+// los modulos y no se mezclan (antes: jupiter 5.10.3 con plataforma 1.12 -> NoSuchMethodError).
 dependencies {
-    "testImplementation"("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-    "testImplementation"("org.junit.jupiter:junit-jupiter-params:$junitVersion")
-    "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+    "testImplementation"(platform("org.junit:junit-bom:$junitVersion"))
+    "testImplementation"("org.junit.jupiter:junit-jupiter-api")
+    "testImplementation"("org.junit.jupiter:junit-jupiter-params")
+    "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine")
     "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
 }
 
